@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ThaiGPT — แชท AI + เจนรูป HD + ค้นเว็บ</title>
+<style>
+html{background:#0f1115}
+:root{--bg:#0f1115;--panel:#171a21;--panel2:#1f232e;--line:#2a2f3c;--txt:#e8eaf0;--mut:#9aa3b5;--acc:#4f8cff;--acc2:#7c5cff}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--txt);font:15px/1.6 system-ui,"Segoe UI",Tahoma,sans-serif;text-align:left}
+#app{display:flex;height:100vh;height:100dvh}
+#sidebar{width:290px;min-width:290px;background:var(--panel);border-right:1px solid var(--line);padding:14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto}
+.side-top{display:flex;gap:8px}
+.primary-btn{background:linear-gradient(135deg,var(--acc),var(--acc2));border:0;color:#fff;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer}
+.primary-btn:disabled{opacity:.6;cursor:wait}
+.ghost-btn,.chip-btn,.icon-btn{background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:8px 12px;cursor:pointer}
+.icon-btn{font-size:18px;padding:8px 11px}
+#githubBtn{border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--txt);cursor:pointer;padding:0 14px}
+.side-label{color:var(--mut);font-size:12px;letter-spacing:.05em;margin-top:4px}
+#chatListEl{display:flex;flex-direction:column;gap:6px;max-height:38vh;overflow-y:auto}
+.chat-item{display:flex;gap:6px;align-items:center;background:transparent;border:1px solid transparent;border-radius:10px;padding:9px 10px;cursor:pointer;color:var(--txt);text-align:left;width:100%}
+.chat-item:hover{background:var(--panel2)}
+.chat-item.active{background:var(--panel2);border-color:var(--acc)}
+.chat-item .t{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-item .x{opacity:.5;border:0;background:none;color:var(--txt);cursor:pointer;font-size:14px}
+.side-settings{display:flex;flex-direction:column;gap:8px}
+.side-settings label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--mut)}
+select,input,textarea{background:#0d0f14;color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:9px 10px;font:inherit}
+select:focus,input:focus,textarea:focus{outline:2px solid var(--acc)}
+.badge{font-size:12px;color:var(--mut);border:1px dashed var(--line);border-radius:10px;padding:8px}
+#main{flex:1;display:flex;flex-direction:column;min-width:0}
+#topbar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);background:rgba(23,26,33,.9)}
+.brand{flex:1;white-space:nowrap;overflow:hidden}.brand span{color:var(--mut);font-size:13px}
+.top-actions{display:flex;gap:8px}
+#menuBtn{display:none}
+#webBar{padding:10px 14px;border-bottom:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap;background:#141821}
+#webBar input{flex:1;min-width:220px}
+#webBar button{border-radius:10px;border:1px solid var(--line);background:var(--acc);color:#fff;padding:9px 14px;cursor:pointer;font-weight:700}
+#sourceChips{display:flex;gap:6px;flex-wrap:wrap;width:100%}
+.src-chip{font-size:12px;background:#0d1420;border:1px solid var(--acc);border-radius:20px;padding:3px 10px;color:#bcd}
+#chatEl{flex:1;overflow-y:auto;padding:22px 14px;display:flex;flex-direction:column;gap:14px;max-width:900px;width:100%;margin:0 auto}
+.msg{display:flex;gap:10px;max-width:100%}
+.msg .av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;font-size:18px;background:var(--panel2);border:1px solid var(--line)}
+.msg.user{flex-direction:row-reverse}
+.msg.user .av{background:linear-gradient(135deg,var(--acc),var(--acc2))}
+.bubble{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;max-width:min(78%,680px);overflow-wrap:anywhere}
+.msg.user .bubble{background:#1b2a4d;border-color:#2c4a8a}
+.bubble pre{background:#0b0d12;border:1px solid var(--line);border-radius:10px;padding:10px;overflow-x:auto}
+.bubble code{font-family:ui-monospace,Consolas,monospace;font-size:13px}
+.bubble p{margin:.4em 0}.bubble h1,.bubble h2,.bubble h3{margin:.5em 0 .3em}
+.bubble a{color:#8ab4ff}
+.msg img.gen{max-width:100%;border-radius:12px;border:1px solid var(--line);display:block;margin-top:8px}
+.img-bar{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.img-bar button,.mini-btn{background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:13px}
+.typing{display:inline-block}.typing i{display:inline-block;width:7px;height:7px;margin:0 2px;border-radius:50%;background:var(--acc);animation:bl 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes bl{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+#emptyHero{text-align:center;padding:30px 18px 10px;color:var(--mut)}
+.hero-logo{font-size:56px}
+#emptyHero h2{color:var(--txt)}
+.hero-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;max-width:760px;margin:18px auto}
+.hero-card{background:var(--panel);border:1px solid var(--line);color:var(--txt);border-radius:14px;padding:14px;cursor:pointer}
+.hero-card:hover{border-color:var(--acc)}
+#composerWrap{padding:12px 14px 14px;max-width:900px;width:100%;margin:0 auto}
+#composer{display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:8px}
+#msgInput{flex:1;resize:none;max-height:140px;border:0;background:transparent}
+#msgInput:focus{outline:none}
+.hint{color:var(--mut);font-size:12px;margin-top:6px;text-align:center}
+#attachPreview{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+#attachPreview img{height:64px;border-radius:10px;border:1px solid var(--line)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.modal[hidden]{display:none}
+.modal-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;max-width:520px;width:100%;display:flex;flex-direction:column;gap:12px;max-height:90vh;overflow-y:auto}
+.modal-card label{display:flex;flex-direction:column;gap:6px;font-size:14px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.check{flex-direction:row!important;align-items:center;gap:8px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end}
+.muted{color:var(--mut);font-size:13px}
+.gh-steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
+.gh-steps code{background:#0b0d12;padding:2px 6px;border-radius:6px;border:1px solid var(--line)}
+@media(max-width:820px){
+  #sidebar{position:fixed;z-index:40;height:100%;left:0;top:0;transform:translateX(-105%);transition:.2s}
+  #sidebar.open{transform:none}
+  #menuBtn{display:block}
+  .bubble{max-width:88%}
+  .brand span{display:none}
+}
+
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar">
+    <div class="side-top">
+      <button id="newChatBtn" class="primary-btn">＋ แชทใหม่</button>
+      <button id="githubBtn" title="วิธีเอาขึ้น GitHub">⬆ GitHub</button>
+    </div>
+    <div class="side-label">ประวัติการสนทนา</div>
+    <div id="chatListEl"></div>
+    <div class="side-label">ตั้งค่า</div>
+    <div class="side-settings">
+      <label>Backend
+        <select id="backendSel">
+          <option value="auto">Auto (Perchance → ฟรี)</option>
+          <option value="perchance">Perchance AI</option>
+          <option value="pollinations">Pollinations (ฟรี, ขึ้น GitHub ได้)</option>
+          <option value="openai">OpenAI-compatible (ใส่คีย์)</option>
+          <option value="gemini">Google Gemini (ใส่คีย์)</option>
+        </select>
+      </label>
+      <label>สไตล์รูป (default)
+        <select id="imgStyleSel">
+          <option value="photo">ภาพถ่ายสมจริง</option>
+          <option value="anime">อนิเมะ</option>
+          <option value="3d">3D / Pixar</option>
+          <option value="oil">สีน้ำมัน / จิตรกรรม</option>
+          <option value="cyber">Cyberpunk / Sci-fi</option>
+          <option value="cute">น่ารัก / Chibi</option>
+        </select>
+      </label>
+      <label>ขนาดรูป
+        <select id="imgSizeSel">
+          <option value="1024x1024">⬛ 1024 (จตุรัส)</option>
+          <option value="1280x1280" selected>⬛ 1280 HD</option>
+          <option value="1920x1080">📺 1920×1080 Full HD</option>
+          <option value="1080x1920">📱 1080×1920 (มือถือ)</option>
+          <option value="768x768">⬛ 768 (เร็ว)</option>
+        </select>
+      </label>
+      <button id="settingsBtn" class="ghost-btn">⚙ API Key / System prompt</button>
+    </div>
+    <div id="backendBadge" class="badge">…</div>
+  </aside>
+
+  <main id="main">
+    <header id="topbar">
+      <button id="menuBtn" class="icon-btn">☰</button>
+      <div class="brand">🤖 <b>ThaiGPT</b> <span>แชท + เจนรูป HD + ค้นเว็บ</span></div>
+      <div class="top-actions">
+        <button id="webModeBtn" class="chip-btn" title="ดึงข้อมูลจากเว็บมาเป็นฐานความรู้">🌐 เว็บ: <b id="webModeState">ปิด</b></button>
+        <button id="exportBtn" class="chip-btn" title="ดาวน์โหลดบทสนทนาเป็น .md">⬇ ส่งออก</button>
+      </div>
+    </header>
+
+    <div id="webBar" hidden>
+      <input id="webQueryInput" placeholder="พิมพ์คำค้น หรือวาง URL เว็บ (เช่น https://th.wikipedia.org/wiki/...) แล้วกด Enter เพื่อดึงมาเป็นฐานข้อมูล" />
+      <button id="webGoBtn">ดึงข้อมูล</button>
+      <button id="webClearBtn" class="ghost-btn">ล้าง</button>
+      <div id="sourceChips"></div>
+    </div>
+
+    <div id="chatEl"></div>
+    <div id="emptyHero">
+      <div class="hero-logo">🤖</div>
+      <h2>สวัสดี! ถามอะไรก็ได้ — ภาษาไทย</h2>
+      <p>พิมพ์คุยเหมือน ChatGPT/Gemini • กด <b>🎨 เจนรูป</b> เพื่อวาดภาพความละเอียดสูง • เปิด <b>🌐 เว็บ</b> เพื่อให้ AI อ่านเว็บเป็นฐานข้อมูล</p>
+      <div class="hero-grid">
+        <button class="hero-card" data-q="เล่าเรื่องสั้นไซไฟหักมุมให้ฟังหน่อย">📖 เล่าเรื่องสั้นไซไฟ</button>
+        <button class="hero-card" data-q="เจนรูป: เมืองลอยฟ้ายามค่ำคืน แสงนีออน รายละเอียดสูง">🎨 เจนรูปเมืองลอยฟ้า</button>
+        <button class="hero-card" data-q="สรุปข่าว AI ล่าสุดให้หน่อย (เปิดโหมดเว็บแล้วค้นว่า AI news)">🌐 ค้นเว็บล่าสุด</button>
+        <button class="hero-card" data-q="เขียนโค้ดเว็บแชทด้วย HTML/CSS/JS ให้หน่อย">💻 เขียนโค้ด</button>
+      </div>
+    </div>
+
+    <div id="composerWrap">
+      <div id="attachPreview" hidden><img id="attachImg" alt="" /><button id="attachRemoveBtn">✕</button></div>
+      <div id="composer">
+        <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp" hidden />
+        <button id="attachBtn" class="icon-btn" title="แนบรูปให้ AI ดู (vision)">📎</button>
+        <button id="imgBtn" class="icon-btn" title="เจนรูปภาพความละเอียดสูง">🎨</button>
+        <textarea id="msgInput" rows="1" placeholder="พิมพ์ข้อความ… (Enter ส่ง / Shift+Enter ขึ้นบรรทัดใหม่ | /image + ข้อความ = เจนรูป)"></textarea>
+        <button id="sendBtn" class="primary-btn">ส่ง ➤</button>
+      </div>
+      <div class="hint">ฟรีไม่ต้องมีคีย์ก็ใช้ได้ • /image + คำอธิบาย = เจนรูป • แนบรูปถามได้ • เปิด 🌐 เพื่อให้ AI อ่านเว็บ</div>
+    </div>
+  </main>
+</div>
+
+<!-- image modal -->
+<div id="imgModal" class="modal" hidden>
+  <div class="modal-card">
+    <h3>🎨 เจนรูปภาพความละเอียดสูง</h3>
+    <textarea id="imgPromptInput" rows="3" placeholder="อธิบายภาพ… เช่น หญิงสาวในชุดไทยยืนกลางทุ่งดอกไม้ยามเย็น แสงทอง รายละเอียดสูง"></textarea>
+    <div class="row2">
+      <label>สไตล์<select id="imgModalStyle">
+        <option value="photo">ภาพถ่ายสมจริง</option><option value="anime">อนิเมะ</option>
+        <option value="3d">3D / Pixar</option><option value="oil">สีน้ำมัน</option>
+        <option value="cyber">Cyberpunk</option><option value="cute">น่ารัก / Chibi</option>
+      </select></label>
+      <label>อัตราส่วน<select id="imgModalSize">
+        <option value="1024x1024">1024 จตุรัส</option><option value="1280x1280" selected>1280 HD จตุรัส</option>
+        <option value="1920x1080">1920×1080 Full HD</option><option value="1080x1920">1080×1920 มือถือ</option>
+      </select></label>
+    </div>
+    <label class="check"><input type="checkbox" id="imgEnhanceCheck" checked /> เพิ่มรายละเอียดเชิงลึก (quality booster + enhance)</label>
+    <div class="modal-actions">
+      <button id="imgModalCancel" class="ghost-btn">ยกเลิก</button>
+      <button id="imgModalGo" class="primary-btn">✨ สร้างภาพ</button>
+    </div>
+  </div>
+</div>
+
+<!-- settings modal -->
+<div id="setModal" class="modal" hidden>
+  <div class="modal-card">
+    <h3>⚙ ตั้งค่า / API Key (สำหรับขึ้น GitHub)</h3>
+    <label>OpenAI-compatible Base URL<input id="apiBaseInput" placeholder="เช่น https://api.openai.com/v1 หรือ https://openrouter.ai/api/v1" /></label>
+    <label>Model<input id="modelInput" placeholder="เช่น gpt-4o-mini / openai / mistral" /></label>
+    <label>API Key (เก็บในเครื่องเท่านั้น)<input id="apiKeyInput" type="password" placeholder="sk-... (Pollinations ฟรีไม่ต้องใส่)" /></label>
+    <label>Gemini API Key<input id="geminiKeyInput" type="password" placeholder="AIza... (ถ้าใช้ backend Gemini)" /></label>
+    <label>System prompt (บุคลิก AI)<textarea id="systemInput" rows="3"></textarea></label>
+    <div class="modal-actions">
+      <button id="setModalCancel" class="ghost-btn">ปิด</button>
+      <button id="setModalSave" class="primary-btn">💾 บันทึก</button>
+    </div>
+    <p class="muted">บน Perchance ไม่ต้องใส่คีย์ • บน GitHub Pages ใช้โหมด Pollinations ฟรีได้ทันที หรือใส่คีย์ของตัวเองก็ได้</p>
+  </div>
+</div>
+
+<!-- github modal -->
+<div id="ghModal" class="modal" hidden>
+  <div class="modal-card">
+    <h3>⬆ เอาขึ้น GitHub (Pages) ใน 3 นาที</h3>
+    <ol class="gh-steps">
+      <li>สร้าง repo ใหม่บน GitHub (เช่น <code>thaigpt</code>) แล้วเปิด <b>Settings → Pages → Deploy from branch → main</b></li>
+      <li>ดาวน์โหลดไฟล์ <b>index.html</b> + โฟลเดอร์ <b>src/</b> จากโปรเจกต์นี้ อัปโหลดเข้า repo (หรือดูคำสั่ง git ใน <code>src/README.md</code>)</li>
+      <li>เปิด <code>https://&lt;ชื่อคุณ&gt;.github.io/thaigpt/</code> — แชทจะใช้โหมด <b>Pollinations ฟรี</b> อัตโนมัติ ไม่ต้องมีคีย์</li>
+    </ol>
+    <p class="muted">อยากใช้โมเดลแรง ๆ: เปิดหน้าเว็บ → ⚙ → เลือก OpenAI-compatible/Gemini แล้วใส่คีย์ (คีย์อยู่แค่ในเบราว์เซอร์ ไม่ถูกอัปโหลด)</p>
+    <div class="modal-actions">
+      <button id="ghDownloadBtn" class="primary-btn">⬇ ดาวน์โหลด index.html ไฟล์เดียว</button>
+      <button id="ghModalClose" class="ghost-btn">ปิด</button>
+    </div>
+  </div>
+</div>
+
+
+
+<style>html{color-scheme:light dark}</style>
+
+<script>
+/* ThaiGPT — chat + HD image + web knowledge
+   Runs on Perchance (plugins) AND on GitHub Pages (Pollinations free API).
+   Classic script (not module) so `root` plugin globals work on Perchance. */
+(function () {
+"use strict";
+const $ = (id) => document.getElementById(id);
+const chatEl=$("chatEl"), msgInput=$("msgInput"), sendBtn=$("sendBtn"),
+  chatListEl=$("chatListEl"), newChatBtn=$("newChatBtn"), backendSel=$("backendSel"),
+  backendBadge=$("backendBadge"), webModeBtn=$("webModeBtn"), webModeState=$("webModeState"),
+  webBar=$("webBar"), webQueryInput=$("webQueryInput"), sourceChips=$("sourceChips"),
+  fileInput=$("fileInput"), attachBtn=$("attachBtn"), imgBtn=$("imgBtn"),
+  attachPreview=$("attachPreview"), attachImg=$("attachImg");
+
+const R = (n) => (typeof root!=="undefined"?root[n]:undefined);
+const hasText = () => !!(R("generateText"));
+const hasImage = () => !!(R("generateImage"));
+const hasFetch = () => !!(R("superFetch"));
+
+/* ---------- state ---------- */
+const LS="thaigpt.v1";
+let store={chats:[],settings:{backend:"auto",system:"คุณคือผู้ช่วย AI ภาษาไทยที่เป็นมิตร ชื่อ ThaiGPT ตอบชัดเจน มีโครงสร้าง ใช้ markdown ได้ ตอบเป็นภาษาไทยเสมอ เว้นแต่ผู้ขอภาษาอื่น ถ้ามีบริบทเว็บให้อ้างอิงและสรุปอย่างซื่อตรง",apiBase:"https://api.openai.com/v1",model:"gpt-4o-mini",apiKey:"",geminiKey:"",imgStyle:"photo",imgSize:"1280x1280"}};
+try{const s=JSON.parse(localStorage.getItem(LS)||"null");if(s&&s.settings)store=s;}catch(e){}
+let currentId=null, webMode=false, webSources=[], attachBlob=null, sending=false;
+function save(){try{localStorage.setItem(LS,JSON.stringify(store));}catch(e){}}
+function settings(){return store.settings;}
+backendSel.value=settings().backend||"auto";
+
+/* ---------- backend resolve ---------- */
+function activeBackend(){
+  const b=settings().backend||"auto";
+  if(b!=="auto")return b;
+  if(hasText())return "perchance";
+  return "pollinations";
+}
+function updateBadge(){
+  const b=activeBackend();
+  backendBadge.textContent=b==="perchance"?"⚡ Backend: Perchance AI (ในเว็บนี้)"
+    :b==="pollinations"?"🆓 Backend: Pollinations ฟรี (ขึ้น GitHub ได้ ไม่ต้องมีคีย์)"
+    :b==="openai"?"🔑 Backend: OpenAI-compatible ("+(settings().model||"?")+")"
+    :"🔑 Backend: Google Gemini";
+}
+updateBadge();
+
+/* ---------- chats ---------- */
+function newChat(){const c={id:"c"+Date.now(),title:"แชทใหม่",msgs:[],created:Date.now()};store.chats.unshift(c);currentId=c.id;save();renderList();renderChat();}
+function cur(){let c=store.chats.find(x=>x.id===currentId);if(!c&&store.chats.length){c=store.chats[0];currentId=c.id;}if(!c){newChat();return store.chats[0];}return c;}
+function renderList(){
+  chatListEl.innerHTML="";
+  store.chats.forEach(c=>{
+    const b=document.createElement("div");b.className="chat-item"+(c.id===currentId?" active":"");
+    const t=document.createElement("button");t.className="t";t.style.cssText="background:none;border:0;color:inherit;cursor:pointer;text-align:left;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap";t.textContent=c.title||"แชท";
+    t.onclick=()=>{currentId=c.id;save();renderList();renderChat();if(window.innerWidth<820)$("sidebar").classList.remove("open");};
+    const x=document.createElement("button");x.className="x";x.textContent="🗑";x.title="ลบ";
+    x.onclick=(e)=>{e.stopPropagation();store.chats=store.chats.filter(k=>k.id!==c.id);if(currentId===c.id)currentId=null;save();renderList();renderChat();};
+    b.appendChild(t);b.appendChild(x);chatListEl.appendChild(b);
+  });
+}
+
+/* ---------- markdown lite ---------- */
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function md(src){
+  let h=esc(src);
+  h=h.replace(/```(\w*)\n([\s\S]*?)```/g,(m,l,c)=>'<pre><code>'+c.replace(/^\n+/,"")+'</code></pre>');
+  h=h.replace(/^### (.*)$/gm,"<h3>$1</h3>").replace(/^## (.*)$/gm,"<h2>$1</h2>");
+  h=h.replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/`([^`]+)`/g,"<code>$1</code>");
+  h=h.replace(/\[([^\]]+)\]\((https?:[^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+  h=h.replace(/^\s*[-*] (.*)$/gm,"• $1");
+  h=h.replace(/\n{2,}/g,"</p><p>").replace(/\n/g,"<br>");
+  return "<p>"+h+"</p>";
+}
+
+/* ---------- render chat ---------- */
+function renderChat(){
+  const c=cur();chatEl.innerHTML="";
+  $("emptyHero").style.display=c.msgs.length?"none":"";
+  c.msgs.forEach(m=>chatEl.appendChild(msgNode(m)));
+  chatEl.scrollTop=chatEl.scrollHeight;renderList();
+}
+function msgNode(m){
+  const d=document.createElement("div");d.className="msg "+m.role;
+  const av=document.createElement("div");av.className="av";av.textContent=m.role==="user"?"🧑":"🤖";
+  const b=document.createElement("div");b.className="bubble";
+  if(m.imageUrl){const im=document.createElement("img");im.className="gen";im.src=m.imageUrl;im.alt=m.text||"generated";b.appendChild(im);
+    const bar=document.createElement("div");bar.className="img-bar";
+    const dl=document.createElement("a");dl.href=m.imageUrl;dl.download="thaigpt-"+Date.now()+".jpg";dl.target="_blank";dl.innerHTML="<button>⬇ ดาวน์โหลด</button>";
+    const cp=document.createElement("button");cp.textContent="📋 คัดลอก prompt";cp.onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(m.text||"");cp.textContent="✓ คัดลอกแล้ว";};
+    bar.appendChild(dl);bar.appendChild(cp);b.appendChild(bar);}
+  if(m.text){const t=document.createElement("div");t.innerHTML=md(m.text);b.appendChild(t);}
+  if(m.sources&&m.sources.length){const s=document.createElement("div");s.style.cssText="margin-top:8px;font-size:12px;color:#9aa3b5";s.innerHTML="📚 อ้างอิง: "+m.sources.map(x=>'<a href="'+esc(x.url)+'" target="_blank" rel="noopener">'+esc(x.title||x.url)+"</a>").join(" • ");b.appendChild(s);}
+  d.appendChild(av);d.appendChild(b);return d;
+}
+function addMsg(role,text,extra){
+  const c=cur();const m=Object.assign({role,text:text||""},extra||{});c.msgs.push(m);
+  if(c.msgs.length===1||c.title==="แชทใหม่"){c.title=(text||"รูปภาพ").slice(0,42);}
+  save();renderList();
+  $("emptyHero").style.display="none";
+  const n=msgNode(m);chatEl.appendChild(n);chatEl.scrollTop=chatEl.scrollHeight;return n;
+}
+function streamNode(){const c=cur();const m={role:"assistant",text:""};c.msgs.push(m);
+  $("emptyHero").style.display="none";
+  const d=document.createElement("div");d.className="msg assistant";
+  d.innerHTML='<div class="av">🤖</div>';
+  const b=document.createElement("div");b.className="bubble";
+  b.innerHTML='<span class="typing"><i></i><i></i><i></i></span>';
+  d.appendChild(b);chatEl.appendChild(d);chatEl.scrollTop=chatEl.scrollHeight;
+  return{el:b,msg:m,done(t){m.text=t;save();renderList();}};
+}
+
+/* ---------- prompt builders ---------- */
+function transcript(msgs,maxChars){
+  maxChars=maxChars||12000;let out=[],len=0;
+  for(let i=msgs.length-1;i>=0;i--){const m=msgs[i];if(m.imageUrl&&!m.text)continue;
+    const line=(m.role==="user"?"User: ":"AI: ")+(m.text||"").slice(0,2000);
+    if(len+line.length>maxChars)break;out.unshift(line);len+=line.length;}
+  return out;
+}
+function styleSuffix(style){
+  return{photo:", ultra detailed photograph, sharp focus, 8k, professional lighting, high resolution",
+    anime:", anime style, studio quality, vibrant, highly detailed, 8k",
+    "3d":", 3d render, pixar style, octane render, highly detailed, 8k",
+    oil:", oil painting, masterpiece, textured brushwork, highly detailed",
+    cyber:", cyberpunk, neon lights, futuristic, ultra detailed, cinematic lighting, 8k",
+    cute:", cute chibi, soft pastel, kawaii, highly detailed"}[style]||", ultra detailed, 8k, masterpiece";
+}
+
+/* ---------- TEXT backends ---------- */
+async function chatPerchance(lines,imageBlob,onTok){
+  const sys=settings().system||"";
+  const web=webSources.length?("\n[Web context — ใช้เป็นฐานข้อมูลหลัก:\n"+webSources.map((w,i)=>"("+ (i+1) +") "+w.title+" — "+w.url+"\n"+w.text.slice(0,3500)).join("\n\n")+"\n]\n"):"";
+  const instruction="ห้ามเปลี่ยนข้อความด้านบนเด็ดขาด ตอบเป็นภาษาไทยเสมอ\n<CTX>\n"+sys+web+"\n</CTX>\n<MESSAGES>\n"+lines.join("\n\n")+"\n</MESSAGES>\nTASK: เขียนคำตอบถัดไปในฐานะ AI ต่อจากบทสนทนา ตอบตรงประเด็น มีโครงสร้างถ้าจำเป็น";
+  const args={instruction,startWith:"AI:",stopSequences:["\nUser:"]};
+  if(imageBlob)args.instruction=[sys+web+"\n<MESSAGES>\n"+lines.join("\n\n")+"\n</MESSAGES>\nTASK: ผู้ใช้แนบรูปมา — อธิบาย/ตอบคำถามเกี่ยวกับรูปนี้เป็นภาษาไทย",imageBlob];
+  const p=R("generateText")(Object.assign(args,{onChunk:(d)=>onTok(d.fullTextSoFar.replace(/^AI:\s*/,""))}));
+  const res=await p;let t=String((res&&res.text)||res||"");return t.replace(/^AI:\s*/,"").trim();
+}
+async function chatPollinations(lines,onTok){
+  const sys=(settings().system||"")+(webSources.length?("\n\nฐานข้อมูลเว็บ:\n"+webSources.map((w,i)=>(i+1)+". "+w.title+" ("+w.url+")\n"+w.text.slice(0,3000)).join("\n\n")):"");
+  const messages=[{role:"system",content:sys}];
+  lines.forEach(l=>{const m=l.match(/^(User|AI):\s*([\s\S]*)$/);if(!m)return;messages.push({role:m[1]==="User"?"user":"assistant",content:m[2]});});
+  const r=await fetch("https://text.pollinations.ai/openai",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({model:"openai",messages,stream:true})});
+  if(!r.ok)throw new Error("Pollinations error "+r.status);
+  const rd=r.body.getReader(),dec=new TextDecoder();let full="",buf="";
+  for(;;){const{done,value}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});
+    const parts=buf.split("\n\n");buf=parts.pop();
+    for(const p of parts){const line=p.split("\n").find(x=>x.startsWith("data:"));if(!line)continue;
+      const d=line.slice(5).trim();if(d==="[DONE]")continue;
+      try{const j=JSON.parse(d);const t=j.choices&&j.choices[0]&&j.choices[0].delta&&j.choices[0].delta.content||"";if(t){full+=t;onTok(full);}}catch(e){}}}
+  return full.trim();
+}
+async function chatOpenAI(lines,onTok){
+  const s=settings();if(!s.apiKey)throw new Error("กรุณาใส่ API Key ใน ⚙ ก่อน (หรือสลับ backend เป็น Pollinations ฟรี)");
+  const sys=(s.system||"")+(webSources.length?("\n\nWeb context:\n"+webSources.map((w,i)=>(i+1)+". "+w.title+"\n"+w.text.slice(0,3000)).join("\n\n")):"");
+  const messages=[{role:"system",content:sys}];
+  lines.forEach(l=>{const m=l.match(/^(User|AI):\s*([\s\S]*)$/);if(m)messages.push({role:m[1]==="User"?"user":"assistant",content:m[2]});});
+  const base=(s.apiBase||"https://api.openai.com/v1").replace(/\/$/,"");
+  const r=await fetch(base+"/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+s.apiKey},
+    body:JSON.stringify({model:s.model||"gpt-4o-mini",messages,stream:true})});
+  if(!r.ok)throw new Error("API error "+r.status+" — ตรวจ base URL / key / model");
+  const rd=r.body.getReader(),dec=new TextDecoder();let full="",buf="";
+  for(;;){const{done,value}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});
+    const parts=buf.split("\n\n");buf=parts.pop();
+    for(const p of parts){const line=p.split("\n").find(x=>x.startsWith("data:"));if(!line)continue;
+      const d=line.slice(5).trim();if(d==="[DONE]")continue;
+      try{const j=JSON.parse(d);const t=j.choices&&j.choices[0]&&(j.choices[0].delta||{}).content||"";if(t){full+=t;onTok(full);}}catch(e){}}}
+  return full.trim();
+}
+async function chatGemini(lines,onTok){
+  const s=settings();if(!s.geminiKey)throw new Error("กรุณาใส่ Gemini API Key ใน ⚙ ก่อน");
+  const sys=(s.system||"")+(webSources.length?("\n\nWeb context:\n"+webSources.map(w=>w.title+": "+w.text.slice(0,3000)).join("\n\n")):"");
+  const contents=lines.map(l=>{const m=l.match(/^(User|AI):\s*([\s\S]*)$/);return{role:m&&m[1]==="User"?"user":"model",parts:[{text:m?m[2]:l}]};});
+  const url="https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key="+encodeURIComponent(s.geminiKey);
+  const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({system_instruction:{parts:[{text:sys}]},contents})});
+  if(!r.ok)throw new Error("Gemini error "+r.status);
+  const t=await r.text();let full="";
+  t.split("\n").forEach(line=>{if(!line.startsWith("data:"))return;try{const j=JSON.parse(line.slice(5));const c=j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts||[];c.forEach(p=>{if(p.text){full+=p.text;onTok(full);}});}catch(e){}});
+  return full.trim();
+}
+
+/* ---------- IMAGE backends ---------- */
+function pollImageUrl(prompt,w,h,enhance,seed){
+  return"https://image.pollinations.ai/prompt/"+encodeURIComponent(prompt)+"?width="+w+"&height="+h+"&seed="+(seed==null?Math.floor(Math.random()*1e9):seed)+"&model=flux&nologo=true&enhance="+(enhance?"true":"false");
+}
+async function genImage(prompt,style,sizeStr,enhance){
+  const[w,h]=sizeStr.split("x").map(Number);
+  const full=prompt+(enhance?styleSuffix(style):"");
+  const b=activeBackend();
+  if(b==="perchance"&&hasImage()){
+    const res=sizeStr==="1920x1080"||w>=1280?"768x512":(w===h?"768x768":"512x768");
+    const r=await R("generateImage")({prompt:full,negativePrompt:"blur, blurry, low quality, watermark, text",resolution:res,guidanceScale:8,hideGalleryButtons:true});
+    return{url:r.dataUrl||String(r),prompt:full,seed:r.inputs&&r.inputs.seed};
+  }
+  const url=pollImageUrl(full,w,h,enhance);
+  await new Promise((res,rej)=>{const im=new Image();im.onload=res;im.onerror=()=>rej(new Error("โหลดรูปไม่สำเร็จ ลองอีกครั้ง"));im.src=url;});
+  return{url,prompt:full,seed:null};
+}
+
+/* ---------- WEB knowledge (superFetch on Perchance, fetch elsewhere) ---------- */
+async function tryFetch(url,timeoutMs){
+  const ctrl=new AbortController();const to=setTimeout(()=>ctrl.abort(),timeoutMs||15000);
+  try{
+    const r=await fetch(url,{signal:ctrl.signal});
+    if(!r.ok)throw new Error("HTTP "+r.status);
+    return await r.text();
+  }finally{clearTimeout(to);}
+}
+// ดึงข้อความข้าม CORS: ยิงตรงก่อน แล้วไล่ proxy ทีละตัว (ตัวไหนล้มก็ข้ามไปตัวถัดไป)
+async function fetchTextChain(url,isJson){
+  const J="__JSON__";
+  const chains=isJson
+    ? [[u=>u,0],
+       [u=>"https://api.allorigins.win/get?url="+encodeURIComponent(u),1],
+       [u=>"https://api.codetabs.com/v1/proxy?quest="+encodeURIComponent(u),0],
+       [u=>"https://corsproxy.io/?url="+encodeURIComponent(u),0]]
+    : [[u=>u,0],
+       [u=>"https://r.jina.ai/"+u,0],
+       [u=>"https://api.allorigins.win/raw?url="+encodeURIComponent(u),0],
+       [u=>"https://api.codetabs.com/v1/proxy?quest="+encodeURIComponent(u),0],
+       [u=>"https://corsproxy.io/?url="+encodeURIComponent(u),0]];
+  let lastErr=null;
+  for(let i=0;i<chains.length;i++){
+    try{
+      let t=await tryFetch(chains[i][0](url),20000);
+      if(chains[i][1]===1){try{t=JSON.parse(t).contents||t;}catch(e){}}
+      if(!t||!t.trim())throw new Error("empty");
+      return t;
+    }catch(e){lastErr=e;
+      const b=$("webGoBtn");if(b)b.textContent="⏳ ลองช่องทางที่ "+(i+2)+"/"+chains.length+"…";}
+  }
+  throw lastErr||new Error("network");
+}
+async function fetchJson(url){
+  if(hasFetch())return(await R("superFetch")(url)).json();
+  return JSON.parse(await fetchTextChain(url,true));
+}
+async function myFetch(url,opt){if(hasFetch())return R("superFetch")(url,opt);return fetch(url,opt);}
+async function fetchPageText(url){
+  let html="";
+  if(hasFetch()){html=await(await myFetch(url)).text();}
+  else{html=await fetchTextChain(url,false);}
+  const doc=new DOMParser().parseFromString(html,"text/html");
+    doc.querySelectorAll("script,style,nav,footer,header,aside").forEach(x=>x.remove());
+    const title=(doc.querySelector("title")||{}).textContent||url;
+    let text=(doc.body?doc.body.innerText:doc.documentElement.textContent)||"";
+    text=text.replace(/\n{3,}/g,"\n\n").trim().slice(0,6000);
+    return{title:title.trim().slice(0,120),url,text};
+}
+async function webSearch(query){
+  const out=[];
+  try{
+    const r=await fetchJson("https://th.wikipedia.org/w/api.php?action=query&list=search&srsearch="+encodeURIComponent(query)+"&format=json&origin=*");
+    const hits=(r.query&&r.query.search||[]).slice(0,3);
+    for(const h of hits){try{const s=await fetchJson("https://th.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(h.title));
+      if(s.extract)out.push({title:s.title||h.title,url:(s.content_urls&&s.content_urls.desktop&&s.content_urls.desktop.page)||("https://th.wikipedia.org/wiki/"+encodeURIComponent(h.title)),text:String(s.extract).slice(0,4000)});}catch(e){}}
+  }catch(e){}
+  try{
+    const r=await fetchJson("https://api.duckduckgo.com/?q="+encodeURIComponent(query)+"&format=json&no_html=1&skip_disambig=1");
+    if(r&&r.AbstractText)out.push({title:r.Heading||"DuckDuckGo",url:r.AbstractURL||("https://duckduckgo.com/?q="+encodeURIComponent(query)),text:String(r.AbstractText).slice(0,3000)});
+  }catch(e){}
+  return out;
+}
+function renderSources(){
+  sourceChips.innerHTML="";
+  webSources.forEach((w,i)=>{const c=document.createElement("span");c.className="src-chip";c.textContent="📄 "+(w.title||w.url).slice(0,40)+" ✕";c.title=w.url;c.style.cursor="pointer";
+    c.onclick=()=>{webSources.splice(i,1);renderSources();};sourceChips.appendChild(c);});
+}
+
+/* ---------- send flow ---------- */
+async function send(text){
+  text=(text||"").trim();
+  if(attachBlob&&!text)text="ช่วยอธิบายรูปนี้หน่อย";
+  if(!text||sending)return;
+  if(/^\/image\s+/i.test(text)||/^(เจนรูป|วาดรูป|สร้างภาพ)[:\s]/i.test(text)){
+    const p=text.replace(/^\/image\s+/i,"").replace(/^(เจนรูป|วาดรูป|สร้างภาพ)[:\s]*/,"").trim();
+    msgInput.value="";autoGrow();doImage(p||"ภาพทิวทัศน์สวยงาม");return;
+  }
+  sending=true;sendBtn.disabled=true;
+  const blob=attachBlob;attachBlob=null;attachPreview.hidden=true;
+  addMsg("user",text);
+  msgInput.value="";autoGrow();
+  const s=streamNode();
+  try{
+    const lines=transcript(cur().msgs.slice(0,-1).concat([{role:"user",text}]));
+    const b=activeBackend();let reply="";
+    const onTok=(t)=>{s.el.innerHTML=md(t||"…");chatEl.scrollTop=chatEl.scrollHeight;};
+    if(b==="perchance")reply=await chatPerchance(lines,blob,onTok);
+    else if(b==="openai")reply=await chatOpenAI(lines,onTok);
+    else if(b==="gemini")reply=await chatGemini(lines,onTok);
+    else reply=await chatPollinations(lines,onTok);
+    s.done(reply||"(AI ตอบว่างเปล่า ลองใหม่อีกครั้ง)");
+    s.el.innerHTML=md(s.msg.text);
+  }catch(e){s.done("⚠️ "+(e.message||e));s.el.innerHTML=md(s.msg.text);}
+  sending=false;sendBtn.disabled=false;chatEl.scrollTop=chatEl.scrollHeight;
+}
+async function doImage(prompt,style,sizeStr,enhance){
+  prompt=(prompt||"").trim()||"ภาพทิวทัศน์แฟนตาซีสวยงาม";
+  style=style||$("imgStyleSel").value||settings().imgStyle;
+  sizeStr=sizeStr||$("imgSizeSel").value||settings().imgSize;
+  if(enhance===undefined)enhance=true;
+  addMsg("user","🎨 "+prompt);
+  const s=streamNode();s.el.innerHTML='<span class="typing"><i></i><i></i><i></i></span> กำลังวาดภาพความละเอียดสูง… (10–60 วินาที)';
+  try{
+    const r=await genImage(prompt,style,sizeStr,enhance);
+    cur().msgs.pop();s.el.closest(".msg").remove();
+    addMsg("assistant",r.prompt,{imageUrl:r.url,sources:webSources.slice(0,3)});
+  }catch(e){s.done("⚠️ วาดรูปไม่สำเร็จ: "+(e.message||e));s.el.innerHTML=md(s.msg.text);}
+  chatEl.scrollTop=chatEl.scrollHeight;
+}
+
+/* ---------- events ---------- */
+function autoGrow(){msgInput.style.height="auto";msgInput.style.height=Math.min(msgInput.scrollHeight,140)+"px";}
+msgInput.addEventListener("input",autoGrow);
+msgInput.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send(msgInput.value);}});
+sendBtn.onclick=()=>send(msgInput.value);
+newChatBtn.onclick=newChat;
+backendSel.onchange=()=>{settings().backend=backendSel.value;save();updateBadge();};
+document.querySelectorAll(".hero-card").forEach(b=>b.onclick=()=>{
+  const q=b.dataset.q;
+  if(q.startsWith("เจนรูป:")){doImage(q.replace("เจนรูป:","").trim());}else send(q);
+});
+webModeBtn.onclick=()=>{webMode=!webMode;webBar.hidden=!webMode;webModeState.textContent=webMode?"เปิด":"ปิด";if(webMode)setTimeout(()=>webQueryInput.focus(),50);};
+$("webGoBtn").onclick=doWeb;webQueryInput.addEventListener("keydown",e=>{if(e.key==="Enter")doWeb();});
+$("webClearBtn").onclick=()=>{webSources=[];webQueryInput.value="";renderSources();};
+async function doWeb(){
+  const q=webQueryInput.value.trim();if(!q)return;
+  $("webGoBtn").disabled=true;$("webGoBtn").textContent="⏳ กำลังดึง…";
+  try{
+    if(/^https?:\/\//i.test(q)){webSources.unshift(await fetchPageText(q));}
+    else{
+      const r=await webSearch(q);
+      if(!r.length)throw new Error("ไม่พบข้อมูล ลองคำค้นอื่นหรือวาง URL ตรง ๆ");
+      webSources=r.concat(webSources);
+    }
+    webSources=webSources.slice(0,5);renderSources();webQueryInput.value="";
+    addMsg("assistant","📚 ดึงข้อมูลเว็บมาเป็นฐานความรู้แล้ว "+webSources.length+" แหล่ง ถามได้เลย (เช่น “สรุปให้หน่อย”) ",{sources:webSources.slice()});
+  }catch(e){addMsg("assistant","⚠️ ดึงเว็บไม่สำเร็จ ("+(e.message||e)+")\n\nลองทีละข้อ:\n• เปลี่ยนคำค้นให้สั้นลง หรือวาง URL ตรง ๆ เช่น https://th.wikipedia.org/wiki/แมว\n• ถ้าเน็ตบริษัท/โรงเรียนบล็อก proxy ให้ลองเน็ตมือถือ\n• ปิด ad-blocker แล้วลองใหม่");}
+  $("webGoBtn").disabled=false;$("webGoBtn").textContent="ดึงข้อมูล";
+}
+attachBtn.onclick=()=>fileInput.click();
+fileInput.onchange=()=>{const f=fileInput.files&&fileInput.files[0];if(!f)return;
+  attachBlob=f;attachImg.src=URL.createObjectURL(f);attachPreview.hidden=false;fileInput.value="";};
+$("attachRemoveBtn").onclick=()=>{attachBlob=null;attachPreview.hidden=true;};
+imgBtn.onclick=()=>{$("imgModal").hidden=false;};
+$("imgModalCancel").onclick=()=>{$("imgModal").hidden=true;};
+$("imgModalGo").onclick=()=>{$("imgModal").hidden=true;doImage($("imgPromptInput").value,$("imgModalStyle").value,$("imgModalSize").value,$("imgEnhanceCheck").checked);$("imgPromptInput").value="";};
+$("settingsBtn").onclick=()=>{
+  $("apiBaseInput").value=settings().apiBase;$("modelInput").value=settings().model;
+  $("apiKeyInput").value=settings().apiKey;$("geminiKeyInput").value=settings().geminiKey;
+  $("systemInput").value=settings().system;$("setModal").hidden=false;};
+$("setModalCancel").onclick=()=>{$("setModal").hidden=true;};
+$("setModalSave").onclick=()=>{Object.assign(settings(),{apiBase:$("apiBaseInput").value.trim(),model:$("modelInput").value.trim(),apiKey:$("apiKeyInput").value.trim(),geminiKey:$("geminiKeyInput").value.trim(),system:$("systemInput").value.trim()});save();$("setModal").hidden=true;updateBadge();};
+$("imgStyleSel").onchange=e=>{settings().imgStyle=e.target.value;save();};
+$("imgSizeSel").onchange=e=>{settings().imgSize=e.target.value;save();};
+$("imgStyleSel").value=settings().imgStyle;$("imgSizeSel").value=settings().imgSize;
+$("exportBtn").onclick=()=>{
+  const c=cur();let out="# "+(c.title||"แชท")+"\n\n";
+  c.msgs.forEach(m=>{out+=(m.role==="user"?"## 🧑 คุณ\n":"## 🤖 ThaiGPT\n")+(m.text||"")+(m.imageUrl?"\n\n!["+(m.text||"image")+"]("+m.imageUrl+")":"")+"\n\n";});
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([out],{type:"text/markdown"}));a.download="thaigpt-chat.md";a.click();
+};
+$("menuBtn").onclick=()=>$("sidebar").classList.toggle("open");
+$("githubBtn").onclick=()=>{$("ghModal").hidden=false;};
+$("ghModalClose").onclick=()=>{$("ghModal").hidden=true;};
+$("ghDownloadBtn").onclick=async()=>{
+  let css="",js="";
+  try{css=await(await fetch("src/styles.css")).text();}catch(e){}
+  try{js=await(await fetch("src/app.js")).text();}catch(e){}
+  if(css.indexOf(":root")<0||js.indexOf("ThaiGPT")<0){alert("ไฟล์นี้คือเวอร์ชันไฟล์เดี่ยวพร้อมใช้แล้ว ไม่ต้องดาวน์โหลดซ้ำ ✅");$("ghModal").hidden=true;return;}
+  let html="<!doctype html><html lang='th'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>ThaiGPT — แชท AI + เจนรูป</title><style>"+css+"</style></head><body>"
+    +document.getElementById("app").outerHTML
+    +document.getElementById("imgModal").outerHTML
+    +document.getElementById("setModal").outerHTML
+    +document.getElementById("ghModal").outerHTML
+    +"<script>"+js.replace(/<\/script>/g,"<\\/script>")+"<\/script></body></html>";
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([html],{type:"text/html"}));a.download="index.html";a.click();
+  $("ghModal").hidden=true;
+};
+
+/* init */
+if(!store.chats.length)newChat();else{currentId=store.chats[0].id;}
+renderList();renderChat();autoGrow();
+window.ThaiGPT={send,doImage,webSearch,get backend(){return activeBackend();}};
+})();
+
+</script>
+</body>
+</html>
